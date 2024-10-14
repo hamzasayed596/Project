@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic 2D Comet Visualization with Orbits</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden; /* Prevent scrollbar */
+        }
+
+        .container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            transform-origin: center; /* Zooms in/out from the center */
+            transition: transform 0.2s; /* Smooth zooming */
+        }
+
+        .earth {
+            position: absolute;
+            background-image: url('C:/Workspace/NASA Space Apps 24/new-earth-image.png.png'); /* Earth image */
+            background-size: cover; /* Ensure the image covers the div */
+            width: 50px; /* Set width */
+            height: 50px; /* Set height */
+            top: calc(50% - 25px);
+            left: calc(50% - 25px);
+            cursor: pointer; /* Change cursor on hover */
+        }
+
+        .comet {
+            position: absolute;
+            background-image: url('C:/Workspace/NASA Space Apps 24/new-comet-image.png.png'); /* Comet image */
+            background-size: cover; /* Ensure the image covers the div */
+            cursor: pointer; /* Change cursor on hover */
+        }
+
+        .orbit {
+            position: absolute;
+            border: 1px dashed white;
+            border-radius: 50%;
+            opacity: 0.5; /* Semi-transparent for orbits */
+            cursor: pointer; /* Change cursor on hover */
+        }
+
+        .info-box {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            display: none; /* Hidden by default */
+            z-index: 1; /* Ensure it's above other elements */
+            transition: opacity 0.3s; /* Fade in effect */
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <div class="earth" id="earth"></div>
+        <div id="comets"></div>
+        <div id="orbits"></div>
+        <div class="info-box" id="info-box"></div> <!-- Info box for comet details -->
+    </div>
+    <script>
+        const cometsContainer = document.getElementById('comets');
+        const orbitsContainer = document.getElementById('orbits');
+        const container = document.getElementById('container');
+        const infoBox = document.getElementById('info-box'); // Reference to the info box
+
+        const earthRadius = 25; // Half of the earth diameter in pixels
+        const distanceMultiplier = 100; // Adjusted multiplier to represent distance in pixels
+
+        // Comet data to be dynamically filled
+        const cometsData = [
+            {
+                "object": "P/2004 R1 (McNaught)",
+                "e": 0.682526943,
+                "i_deg": 4.894555854,
+                "q_au_1": 0.986192006,
+                "p_yr": 5.48,
+                "moid_au": "0.027011",
+                "angle": Math.random() * 2 * Math.PI, // Random initial angle for variety
+                "orbitRadius": 0,
+                "speed": 0
+            },
+            {
+                "object": "1P/Halley",
+                "e": 0.9671429085,
+                "i_deg": 162.2626906,
+                "q_au_1": 0.5859781115,
+                "p_yr": 75.32,
+                "moid_au": "0.063782",
+                "angle": Math.random() * 2 * Math.PI,
+                "orbitRadius": 0,
+                "speed": 0
+            },
+            {
+                "object": "2P/Encke",
+                "e": 0.8482682514,
+                "i_deg": 11.77999525,
+                "q_au_1": 0.3360923855,
+                "p_yr": 3.3,
+                "moid_au": "0.173092",
+                "angle": Math.random() * 2 * Math.PI,
+                "orbitRadius": 0,
+                "speed": 0
+            }
+        ];
+
+        const G = 6.67430e-11; // Gravitational constant
+        const M = 1.989e30; // Mass of the Sun in kg
+        const AU = 1.496e11; // 1 Astronomical Unit in meters
+
+        // Create comet elements and their orbits
+        function createComets() {
+            cometsData.forEach(comet => {
+                const cometDiv = document.createElement('div');
+                cometDiv.classList.add('comet');
+
+                // Calculate size based on perihelion distance (q_au_1)
+                const cometSize = Math.max(10, comet.q_au_1 * 10); // Adjusted for visibility
+                cometDiv.style.width = `${cometSize}px`;
+                cometDiv.style.height = `${cometSize}px`;
+                cometsContainer.appendChild(cometDiv);
+                comet.element = cometDiv; // Store the comet element in the data object
+                
+                // Calculate orbit radius based on perihelion distance
+                comet.orbitRadius = (comet.q_au_1 * distanceMultiplier) + earthRadius;
+
+                // Calculate semi-major axis (in AU) and speed
+                const a = (comet.q_au_1 * 2); // Approximate semi-major axis in AU
+                comet.speed = Math.sqrt(G * M * (1 + comet.e) / (a * AU * (1 - comet.e))) * 1e-9 * 100; // Speed multiplied by 100
+
+                // Create orbit element
+                const orbitDiv = document.createElement('div');
+                orbitDiv.classList.add('orbit');
+                orbitDiv.style.width = `${comet.orbitRadius * 2}px`;
+                orbitDiv.style.height = `${comet.orbitRadius * 2}px`;
+                orbitDiv.style.left = `${300 - comet.orbitRadius}px`; // Centering orbit
+                orbitDiv.style.top = `${300 - comet.orbitRadius}px`; // Centering orbit
+                orbitsContainer.appendChild(orbitDiv);
+
+                // Add click event to display comet info when comet is clicked
+                cometDiv.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent the click from bubbling up to the orbit
+                    displayCometInfo(comet);
+                });
+
+                // Add click event to display comet info when orbit is clicked
+                orbitDiv.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent the click from bubbling up to the comet
+                    displayCometInfo(comet);
+                });
+            });
+
+            animateComets(); // Start the animation after creating comets
+        }
+
+        function animateComets() {
+            cometsData.forEach((comet) => {
+                // Update the angle for each comet based on its orbital speed
+                comet.angle += comet.speed; // Adjust speed based on calculated speed
+                
+                // Calculate new position based on updated angle
+                comet.element.style.left = `${(comet.orbitRadius * Math.cos(comet.angle)) + 300 - (comet.element.offsetWidth / 2)}px`; // Centering the image
+                comet.element.style.top = `${(comet.orbitRadius * Math.sin(comet.angle)) + 300 - (comet.element.offsetHeight / 2)}px`; // Centering the image
+            });
+
+            requestAnimationFrame(animateComets); // Keep animating
+        }
+
+        function displayCometInfo(comet) {
+            infoBox.innerHTML = `
+                <strong>${comet.object}</strong><br>
+                Eccentricity (e): ${comet.e}<br>
+                Inclination (i): ${comet.i_deg}°<br>
+                Perihelion (q): ${comet.q_au_1} AU<br>
+                Orbital Period: ${comet.p_yr} years<br>
+                MOID: ${comet.moid_au} AU
+            `;
+            infoBox.style.display = 'block'; // Show the info box
+            infoBox.style.opacity = '1'; // Fade in
+            infoBox.style.left = '10px'; // Set position
+            infoBox.style.top = '10px'; // Set position
+        }
+
+        // Zoom functionality
+        let scale = 1;
+        container.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            scale += event.deltaY * -0.001; // Adjust scaling based on mouse wheel movement
+            scale = Math.min(Math.max(0.5, scale), 3); // Limit the zoom scale
+            container.style.transform = `scale(${scale})`; // Apply scaling
+        });
+
+        // Click event for Earth to display info
+        const earthElement = document.getElementById('earth');
+        earthElement.addEventListener('click', () => {
+            infoBox.innerHTML = `
+                <strong>Earth</strong><br>
+                Our home planet.<br>
+                Diameter: 12,742 km<br>
+                Distance from Sun: 1 AU
+            `;
+            infoBox.style.display = 'block'; // Show the info box
+            infoBox.style.opacity = '1'; // Fade in
+            infoBox.style.left = '10px'; // Set position
+            infoBox.style.top = '10px'; // Set position
+        });
+
+        createComets(); // Initialize comets
+    </script>
+</body>
+</html>

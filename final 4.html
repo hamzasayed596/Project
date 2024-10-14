@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEO Web App</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background-color: black; /* Background color set to black */
+        }
+
+        /* Style for header */
+        header {
+            background-color: rgba(1, 1, 1, 0.7); /* Header background color set to transparent (70% opacity) */
+            color: white; /* Text color for header changed to white for contrast */
+            padding: 10px 0;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* Navigation links style */
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul li {
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: white; /* Link color set to white for better contrast */
+            font-size: 18px;
+            padding: 8px 16px;
+        }
+
+        nav ul li a:hover {
+            background-color: rgba(135, 206, 235, 0.8); /* Slightly transparent blue for hover effect */
+            border-radius: 5px;
+        }
+
+        /* Fullscreen iframe */
+        .fullscreen-iframe {
+            position: absolute;
+            top: 50px; /* Position the iframe just below the header */
+            left: 0;
+            width: 100%;
+            height: calc(100% - 50px); /* Full height minus header height */
+            border: none;
+            background-color: black; /* Black background behind the iframe */
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav>
+        <ul>
+            <li><a href="#" id="home-link">Home</a></li>
+            <li><a href="#" id="details-link">Details</a></li>
+            <li><a href="#" id="team-link">Meet Our Team</a></li>
+            <li><a href="#" id="neo-link">NEO</a></li> <!-- NEO Page Link -->
+        </ul>
+    </nav>
+</header>
+
+<!-- Home iframe page -->
+<iframe id="home-iframe" class="fullscreen-iframe" src="https://eyes.nasa.gov/apps/asteroids/#/home" allowfullscreen></iframe>
+
+<!-- Details iframe -->
+<iframe id="details-iframe" class="fullscreen-iframe" src="file:///C:\Workspace\NASA Space Apps 24\details.html" style="display:none;" allowfullscreen></iframe>
+
+<!-- Meet Our Team iframe -->
+<iframe id="team-iframe" class="fullscreen-iframe" src="file:///C:\Workspace\NASA Space Apps 24\meet our team.html" style="display:none;" allowfullscreen></iframe>
+
+<!-- NEO iframe (orbits page) -->
+<iframe id="neo-iframe" class="fullscreen-iframe" src="file:///C:\Workspace\NASA Space Apps 24\orbits 3.html" style="display:none;" allowfullscreen></iframe>
+
+<script>
+    const homeLink = document.getElementById('home-link');
+    const detailsLink = document.getElementById('details-link');
+    const teamLink = document.getElementById('team-link');
+    const neoLink = document.getElementById('neo-link');
+    const homeIframe = document.getElementById('home-iframe');
+    const detailsIframe = document.getElementById('details-iframe');
+    const teamIframe = document.getElementById('team-iframe');
+    const neoIframe = document.getElementById('neo-iframe');
+
+    // Switch to the home view
+    homeLink.addEventListener('click', () => {
+        detailsIframe.style.display = 'none';
+        teamIframe.style.display = 'none';
+        neoIframe.style.display = 'none';
+        homeIframe.style.display = 'block'; // Show the home iframe
+    });
+
+    // Switch to the details page view
+    detailsLink.addEventListener('click', () => {
+        homeIframe.style.display = 'none';
+        teamIframe.style.display = 'none';
+        neoIframe.style.display = 'none';
+        detailsIframe.style.display = 'block'; // Show the details iframe
+    });
+
+    // Switch to the team page view
+    teamLink.addEventListener('click', () => {
+        homeIframe.style.display = 'none';
+        detailsIframe.style.display = 'none';
+        neoIframe.style.display = 'none';
+        teamIframe.style.display = 'block'; // Show the team iframe
+    });
+
+    // Switch to the NEO page view
+    neoLink.addEventListener('click', () => {
+        homeIframe.style.display = 'none';
+        detailsIframe.style.display = 'none';
+        teamIframe.style.display = 'none';
+        neoIframe.style.display = 'block'; // Show the NEO iframe
+    });
+</script>
+
+</body>
+</html>
